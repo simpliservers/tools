@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/ip-address.js"></script>
+    <title>Tools | IPv4 convertor</title>
+    <style>
+        * {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        ul li {
+            display: inline;
+            padding: 0 10px;
+        }
+
+        ul {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <ul>
+        <li><a href="password.html">Password Generator</a></li>
+        <li><a href="ipRangeToCidr.html">IPv4 Range to subnet</a></li>
+        <li><a href="ipv4subnet.html">IPv4 subnet calculator</a></li>
+        <li><a href="ipv6subnet.html">IPv6 subnet calculator</a></li>
+        <li><a href="ipv4convert.html">IPv4 convertor</a></li>
+        <li><a href="unixtime.html">Unix time convertor</a></li>
+        <li><a href="domain.html">Domain lookup</a></li>
+    </ul>
+
+    <div style="margin-left: 20px;">
+        <input id="ipField" placeholder="178.18.0.1" oninput="convertIp()">
+        <button>Convert</button>
+        <h4 id="errorField"></h4>
+        <p>IPv4: </p><p id="ipv4"></p>
+        <p>IPv6 (short): </p><p id="ipv6s"></p>
+        <p>IPv6 (long): </p><p id="ipv6l"></p>
+        <p>Integer: </p><p id="ipi"></p>
+        <p>Hex: </p><p id="iph"></p>
+    </div>
+
+    <script>
+        const errorField = document.getElementById("errorField")
+        
+        convertIp()
+        function convertIp() {
+            errorField.innerText = ""
+            const ipField = document.getElementById("ipField")
+            const ipv4 = document.getElementById("ipv4")
+            const ipv6s = document.getElementById("ipv6s")
+            const ipv6l = document.getElementById("ipv6l")
+            const ipi = document.getElementById("ipi")
+            const iph = document.getElementById("iph")
+
+            if(!ipField.value) return
+            if(!ipField.value.split(".")[3]) return
+            let address
+            try {
+                // don't question it
+                if(!!ipField.value.split("/")[1]) throw Error()
+                address = new ip.Address4(ipField.value)
+            } catch {
+                errorField.innerText = "Invalid IP address"
+                ipv4.innerText = ""
+                ipv6s.innerText = ""
+                ipv6l.innerText = ""
+                ipi.innerText = ""
+                iph.innerText = ""
+                return
+            }
+            ipv4.innerText = address.address
+            ipv6s.innerText = ip.Address6.fromAddress4(address.address).correctForm()
+            ipv6l.innerText = ip.Address6.fromAddress4(address.address).canonicalForm()
+            ipi.innerText = Number(address.bigInteger())
+
+            // original method give a number in a format like 00:00:00:00 which would be then converted to 0x00000000
+            iph.innerText = "0x" + address.toHex().toUpperCase().replace(/:+/g, "")
+        }
+    </script>
+</body>
+</html>

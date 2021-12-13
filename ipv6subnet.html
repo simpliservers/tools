@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/ip-address.js"></script>
+    <title>Tools | IPv6 subnet calculator</title>
+    <style>
+        * {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        ul li {
+            display: inline;
+            padding: 0 10px;
+        }
+
+        ul {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <ul>
+        <li><a href="password.html">Password Generator</a></li>
+        <li><a href="ipRangeToCidr.html">IPv4 Range to subnet</a></li>
+        <li><a href="ipv4subnet.html">IPv4 subnet calculator</a></li>
+        <li><a href="ipv6subnet.html">IPv6 subnet calculator</a></li>
+        <li><a href="ipv4convert.html">IPv4 convertor</a></li>
+        <li><a href="unixtime.html">Unix time convertor</a></li>
+        <li><a href="domain.html">Domain lookup</a></li>
+    </ul>
+
+    <div style="margin-left: 20px;">
+        <input id="subnetField" placeholder="2400:cb00::/32" oninput="convertSubnet()">
+        <button>Calculate</button>
+        <label for="displaySelect" style="margin-left: 20px;">Display</label>
+        <select id="displaySelect" value="long" oninput="convertSubnet()">
+            <option value="long">Long</option>
+            <option value="short">Short</option>
+        </select>
+        <h4 id="errorField"></h4>
+        <p>CIDR: </p><p id="cidr"></p>
+        <p>Address: </p><p id="address"></p>
+        <p>Range start: </p><p id="rangeStart"></p>
+        <p>Range end: </p><p id="rangeEnd"></p>
+        <p>Bits: </p><p id="bits"></p>
+        <p>Usable: </p><p id="usable"></p>
+    </div>
+
+    <script>
+        const errorField = document.getElementById("errorField")
+        
+        convertSubnet()
+        function convertSubnet() {
+            const subnetField = document.getElementById("subnetField")
+            const displaySelect = document.getElementById("displaySelect")
+            const long = displaySelect.value === "long"
+
+            const cidr = document.getElementById("cidr")
+            const address = document.getElementById("address")
+            const rangeStart = document.getElementById("rangeStart")
+            const rangeEnd = document.getElementById("rangeEnd")
+            const bits = document.getElementById("bits")
+            const usable = document.getElementById("usable")
+
+            if(!subnetField.value || !subnetField.value.split("/")[1]) return
+            let subnet;
+            try {
+                subnet = new ip.Address6(subnetField.value)
+            } catch {
+                errorField.innerText = "Invalid subnet mask"
+                cidr.innerText = ""
+                address.innerText = ""
+                rangeStart.innerText = ""
+                rangeEnd.innerText = ""
+                bits.innerText = ""
+                usable.innerText = ""
+                return
+            }
+            cidr.innerText = displayIp(subnet, long) + "/" + subnet.subnetMask
+            address.innerText = displayIp(subnet, long)
+            rangeStart.innerText = displayIp(subnet.startAddress(), long)
+            rangeEnd.innerText = displayIp(subnet.endAddress(), long)
+            bits.innerText = subnet.subnetMask
+            usable.innerText = subnet.possibleSubnets()
+        }
+
+        function displayIp(address, long) {
+            return long ? address.canonicalForm() : address.correctForm()
+        }
+    </script>
+</body>
+</html>
