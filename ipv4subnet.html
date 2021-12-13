@@ -1,109 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="js/ip-address.js"></script>
     <title>Tools | IPv4 subnet calculator</title>
-    <style>
-        * {
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        ul li {
-            display: inline;
-            padding: 0 10px;
-        }
-
-        ul {
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-    <ul>
-        <li><a href="password.html">Password Generator</a></li>
-        <li><a href="ipRangeToCidr.html">IPv4 Range to subnet</a></li>
-        <li><a href="ipv4subnet.html">IPv4 subnet calculator</a></li>
-        <li><a href="ipv6subnet.html">IPv6 subnet calculator</a></li>
-        <li><a href="ipv4convert.html">IPv4 convertor</a></li>
-        <li><a href="unixtime.html">Unix time convertor</a></li>
-        <li><a href="domain.html">Domain lookup</a></li>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <ul id="menu">
+      <li><a href="password.html">Password Generator</a></li>
+      <li><a href="ipRangeToCidr.html">IPv4 Range to subnet</a></li>
+      <li><a href="ipv4subnet.html">IPv4 subnet calculator</a></li>
+      <li><a href="ipv6subnet.html">IPv6 subnet calculator</a></li>
+      <li><a href="ipv4convert.html">IPv4 convertor</a></li>
+      <li><a href="unixtime.html">Unix time convertor</a></li>
+      <li><a href="domain.html">Domain lookup</a></li>
     </ul>
 
-    <div style="margin-left: 20px;">
-        <input id="subnetField" placeholder="178.18.0.1/24" oninput="convertSubnet()">
-        <button>Calculate</button>
-        <h4 id="errorField"></h4>
-        <p>CIDR: </p><p id="cidr"></p>
-        <p>Range: </p><p id="range"></p>
-        <p>Bits: </p><p id="bits"></p>
-        <p>Mask: </p><p id="mask"></p>
-        <p>Wildcard: </p><p id="wildcard"></p>
-        <p>Usable: </p><p id="usable"></p>
+    <div id="content" style="margin-left: 20px">
+      <input
+        id="subnetField"
+        placeholder="178.18.0.1/24"
+        oninput="convertSubnet()"
+      />
+      <button>Calculate</button>
+      <h4 id="errorField"></h4>
+      <p>CIDR:</p>
+      <p id="cidr"></p>
+      <p>Range:</p>
+      <p id="range"></p>
+      <p>Bits:</p>
+      <p id="bits"></p>
+      <p>Mask:</p>
+      <p id="mask"></p>
+      <p>Wildcard:</p>
+      <p id="wildcard"></p>
+      <p>Usable:</p>
+      <p id="usable"></p>
     </div>
 
     <script>
-        const errorField = document.getElementById("errorField")
+      const errorField = document.getElementById("errorField");
 
-        convertSubnet()
-        function convertSubnet() {
-            errorField.innerText = ""
-            const subnetField = document.getElementById("subnetField")
-            const cidr = document.getElementById("cidr")
-            const range = document.getElementById("range")
-            const bits = document.getElementById("bits")
-            const mask = document.getElementById("mask")
-            const wildcard = document.getElementById("wildcard")
-            const usable = document.getElementById("usable")
+      convertSubnet();
+      function convertSubnet() {
+        errorField.innerText = "";
+        const subnetField = document.getElementById("subnetField");
+        const cidr = document.getElementById("cidr");
+        const range = document.getElementById("range");
+        const bits = document.getElementById("bits");
+        const mask = document.getElementById("mask");
+        const wildcard = document.getElementById("wildcard");
+        const usable = document.getElementById("usable");
 
-            if(!subnetField.value || !subnetField.value.split("/")[1]) return
-            let subnet;
-            try {
-                subnet = new ip.Address4(subnetField.value)
-            } catch {
-                errorField.innerText = "Invalid subnet mask"
-                cidr.innerText = ""
-                range.innerText = ""
-                bits.innerText = ""
-                mask.innerText = ""
-                wildcard.innerText = ""
-                usable.innerText = ""
-                return
-            }
-            cidr.innerText = subnet.correctForm() + "/" + subnet.subnetMask
-            range.innerText = subnet.startAddress().correctForm() + " - " + subnet.endAddress().correctForm()
-            bits.innerText = subnet.subnetMask
+        if (!subnetField.value || !subnetField.value.split("/")[1]) return;
+        let subnet;
+        try {
+          subnet = new ip.Address4(subnetField.value);
+        } catch {
+          errorField.innerText = "Invalid subnet mask";
+          cidr.innerText = "";
+          range.innerText = "";
+          bits.innerText = "";
+          mask.innerText = "";
+          wildcard.innerText = "";
+          usable.innerText = "";
+          return;
+        }
+        cidr.innerText = subnet.correctForm() + "/" + subnet.subnetMask;
+        range.innerText =
+          subnet.startAddress().correctForm() +
+          " - " +
+          subnet.endAddress().correctForm();
+        bits.innerText = subnet.subnetMask;
 
-            const subnetParts = calculateSubnet(subnet)
-            mask.innerText = subnetParts.join(".")
-            wildcard.innerText = calculateWildcardSubnet(subnetParts).join(".")
+        const subnetParts = calculateSubnet(subnet);
+        mask.innerText = subnetParts.join(".");
+        wildcard.innerText = calculateWildcardSubnet(subnetParts).join(".");
 
-            // 31 & 32 don't work with the current method
-            if(subnet.subnetMask == 31) usable.innerText = 2
-            else if(subnet.subnetMask == 32) usable.innerText = 1
-            else usable.innerText = Math.pow(2, Math.max(0, 32 - subnet.subnetMask)) - 2
+        // 31 & 32 don't work with the current method
+        if (subnet.subnetMask == 31) usable.innerText = 2;
+        else if (subnet.subnetMask == 32) usable.innerText = 1;
+        else
+          usable.innerText =
+            Math.pow(2, Math.max(0, 32 - subnet.subnetMask)) - 2;
+      }
+
+      function calculateSubnet(subnet) {
+        const bits = subnet.subnetMask;
+        const parts = [];
+        let current = "";
+        for (let i = 0; i < 32; i++) {
+          current += i < bits ? 1 : 0;
+
+          if ((i + 1) % 8 == 0) {
+            parts.push(current);
+            current = "";
+          }
         }
 
-        function calculateSubnet(subnet) {
-            const bits = subnet.subnetMask
-            const parts = []
-            let current = ""
-            for(let i = 0; i < 32; i++) {
-                current += i < bits ? 1 : 0
-                
-                if((i + 1) % 8 == 0) {
-                    parts.push(current)
-                    current = ""
-                }
-            }
-            
-            return parts.map(it => parseInt(it, 2))
-        }
+        return parts.map((it) => parseInt(it, 2));
+      }
 
-        function calculateWildcardSubnet(subnetParts) {
-            return subnetParts.map(it => 255 - it)
-        }
+      function calculateWildcardSubnet(subnetParts) {
+        return subnetParts.map((it) => 255 - it);
+      }
     </script>
-</body>
+  </body>
 </html>
